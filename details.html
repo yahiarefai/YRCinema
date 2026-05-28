@@ -24,7 +24,10 @@
             const session = JSON.parse(localStorage.getItem('userSession') || '{}');
             const nameDisplay = document.getElementById('navUserName');
             if (session && session.email) {
-                const extractedName = session.name || "user";
+                const parts = [];
+                if (session.name) parts.push(session.name);
+                if (session.lastname) parts.push(session.lastname);
+                const extractedName = parts.length > 0 ? parts.join(" ") : session.email.split('@')[0];
                 if(nameDisplay) nameDisplay.textContent = extractedName;
             }
         });
@@ -38,7 +41,10 @@
             const session = JSON.parse(localStorage.getItem('userSession') || '{}');
             const nameDisplay = document.getElementById('navUserName');
             if (session && session.email) {
-                const extractedName = session.name || "user";
+                const parts = [];
+                if (session.name) parts.push(session.name);
+                if (session.lastname) parts.push(session.lastname);
+                const extractedName = parts.length > 0 ? parts.join(" ") : session.email.split('@')[0];
                 if(nameDisplay) nameDisplay.textContent = extractedName;
             }
         });

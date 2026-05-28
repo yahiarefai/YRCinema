@@ -159,12 +159,17 @@
 
             try {
                 // استدعاء Supabase لإنشاء الحساب وإرسال إيميل التأكيد
+                const nameParts = fullName.trim().split(' ');
+                const name = nameParts[0] || 'User';
+                const lastname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
                 const { data, error } = await supabase.auth.signUp({
                     email: email,
                     password: password,
                     options: {
                         data: {
-                            full_name: fullName,
+                            name: name,
+                            lastname: lastname,
                             age: age,
                             phone: phone
                         },
@@ -179,8 +184,8 @@
 const usersDB = JSON.parse(localStorage.getItem("usersDB")) || [];
 
 usersDB.push({
-    name: fullName,
-    lastname: "",
+    name: name,
+    lastname: lastname,
     email: email,
     password: password
 });

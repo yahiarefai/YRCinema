@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Sign In - CineVerse</title>
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+
+
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+    <!-- Your CSS -->
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white overflow-x-hidden overflow-y-auto">
     <!-- Animated background elements -->
@@ -123,17 +132,24 @@ if (error) {
 
 const user = data.user;
 
-// الاسم (fallback قوي)
-const name =
-    user?.user_metadata?.full_name ||
-    user?.email?.split("@")[0] ||
-    "User";
+let name = user?.user_metadata?.name || "";
+let lastname = user?.user_metadata?.lastname || "";
+
+if (!name && user?.user_metadata?.full_name) {
+    const parts = user.user_metadata.full_name.trim().split(" ");
+    name = parts[0] || "User";
+    lastname = parts.length > 1 ? parts.slice(1).join(" ") : "";
+} else if (!name) {
+    name = user?.email?.split("@")[0] || "User";
+}
 
 localStorage.setItem('userSession', JSON.stringify({
     email: user.email,
-    name: user?.user_metadata?.full_name || user.email.split("@")[0],
+    name: name,
+    lastname: lastname,
     id: user.id,
-    loggedIn: true
+    loggedIn: true,
+    user_metadata: user.user_metadata || {}
 }));
 
 window.location.href = "index.html";
@@ -164,6 +180,7 @@ document.querySelectorAll('.password-toggle-icon').forEach(icon => {
 
 });
 </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="script.js"></script>
 </body>
 </html>

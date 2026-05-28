@@ -149,7 +149,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     new Swiper('.heroSwiper', {
+        centeredSlides: true,
+        slidesPerView: 1,
+        speed: 800,
         loop: true,
+        initialSlide: 0,
+        grabCursor: true,
+        touchRatio: 1.2,
+        preventInteractionOnTransition: true,
+        watchSlidesProgress: true,
+        observer: true,
+        observeParents: true,
         autoplay: {
             delay: 5000,
             disableOnInteraction: false,
@@ -533,8 +543,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         e.preventDefault();
 
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!email || !password) {
+            alert("Please enter your information.");
+            return;
+        }
 
         const btn = signinForm.querySelector("button[type='submit']");
 
@@ -545,6 +560,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!supabaseClient) {
             alert("Supabase is not connected.");
+
+            if (btn) {
+                btn.innerHTML = "SIGN IN";
+                btn.disabled = false;
+            }
+
             return;
         }
 
@@ -554,26 +575,52 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (error) {
-            alert("❌ " + error.message);
-            submitBtn.disabled = false;   // ❌ خطأ أصلاً (submitBtn غير معرف)
-            submitBtn.textContent = 'Sign In';
+
+            alert(error.message);
+
+            if (btn) {
+                btn.innerHTML = "SIGN IN";
+                btn.disabled = false;
+            }
+
             return;
         }
 
         const user = data.user;
+        let name = user?.user_metadata?.name || "";
+        let lastname = user?.user_metadata?.lastname || "";
 
-        const name =
-            user?.user_metadata?.full_name ||
-            user?.email?.split("@")[0] ||
-            "User";
+        if (!name && user?.user_metadata?.full_name) {
+            const parts = user.user_metadata.full_name.trim().split(" ");
+            name = parts[0] || "User";
+            lastname = parts.length > 1 ? parts.slice(1).join(" ") : "";
+        } else if (!name) {
+            name = user?.email?.split("@")[0] || "User";
+        }
 
-        localStorage.setItem('userSession', JSON.stringify({
+        localStorage.setItem("userSession", JSON.stringify({
+            id: user.id,
             email: user.email,
             name: name,
-            loggedIn: true
+            lastname: lastname,
+            loggedIn: true,
+            user_metadata: user.user_metadata || {}
         }));
 
         window.location.href = "index.html";
+
     });
 
 });
+
+// --- Global Window Exports for Vite / Modules ---
+window.selectMovie = selectMovie;
+window.transitionTo = transitionTo;
+window.goHome = goHome;
+window.handleConfirmBooking = handleConfirmBooking;
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.showToast = showToast;
+window.handleForgotPassword = function(e) {
+    if (e) e.preventDefault();
+    window.location.href = 'reset-password.html';
+};

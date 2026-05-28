@@ -65,9 +65,14 @@
 
         const session = JSON.parse(localStorage.getItem("userSession")) || {};
 
-document.getElementById("profileName").value = session.name || "";
-document.getElementById("profileLastname").value = session.lastname || "";
-document.getElementById("profileEmail").value = session.email || "";
+document.getElementById("profileName").value =
+    session.user_metadata?.name || "";
+
+document.getElementById("profileLastname").value =
+    session.user_metadata?.lastname || "";
+
+document.getElementById("profileEmail").value =
+    session.email || "";
 
         // 2. حركة الاختفاء عند كبس زر الرجوع
         function goBack() {
@@ -88,9 +93,13 @@ document.getElementById("profileEmail").value = session.email || "";
 
     const oldEmail = session.email;
 
-    session.name = name;
-    session.lastname = lastname;
-    session.email = email;
+if (!session.user_metadata) {
+    session.user_metadata = {};
+}
+
+session.user_metadata.name = name;
+session.user_metadata.lastname = lastname;
+session.email = email;
 
     let usersDB = JSON.parse(localStorage.getItem("usersDB")) || [];
 

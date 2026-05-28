@@ -71,7 +71,10 @@
             const session = JSON.parse(localStorage.getItem('userSession') || '{}');
             const nameDisplay = document.getElementById('navUserName');
             if (session && session.email) {
-                const extractedName = session.name || "user";
+                const parts = [];
+                if (session.name) parts.push(session.name);
+                if (session.lastname) parts.push(session.lastname);
+                const extractedName = parts.length > 0 ? parts.join(" ") : session.email.split('@')[0];
                 if(nameDisplay) nameDisplay.textContent = extractedName;
             }
         });
@@ -159,21 +162,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
 
-<script>
-window.addEventListener("load", () => {
-    new Swiper('.heroSwiper', {
-        loop: true,
-        autoplay: {
-            delay: 5000,
-            disableOnInteraction: false,
-        },
-        pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-        },
-    });
-});
-</script>
 <script>
 let lastScrollY = window.scrollY;
 const navbar = document.querySelector("nav");
