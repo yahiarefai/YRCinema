@@ -109,32 +109,33 @@ document.getElementById('signinForm').addEventListener('submit', async function(
     submitBtn.disabled = true;
     submitBtn.textContent = 'Loading...';
 
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-    });
-
-    if (error) {
-        alert("❌ " + error.message);
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign In';
-        return;
-    }
-
-    // remember me (اختياري)
-    if (rememberMe) {
-        localStorage.setItem('rememberEmail', email);
-    } else {
-        localStorage.removeItem('rememberEmail');
-    }
-
-  localStorage.setItem('userSession', JSON.stringify({
+const { data, error } = await supabaseClient.auth.signInWithPassword({
     email,
-    name: user.user_metadata?.full_name || email.split("@")[0],
+    password
+});
+
+if (error) {
+    alert("❌ " + error.message);
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Sign In';
+    return;
+}
+
+const user = data.user;
+
+// الاسم (fallback قوي)
+const name =
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "User";
+
+localStorage.setItem('userSession', JSON.stringify({
+    email: user.email,
+    name: name,
     loggedIn: true
 }));
 
-    window.location.replace('index.html');
+window.location.href = "index.html";
 });
 
     </script>

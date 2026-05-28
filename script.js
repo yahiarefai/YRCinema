@@ -544,9 +544,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (!supabaseClient) {
-    alert("Supabase is not connected.");
-    return;
-}
+            alert("Supabase is not connected.");
+            return;
+        }
 
         const { data, error } = await supabaseClient.auth.signInWithPassword({
             email,
@@ -554,17 +554,24 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (error) {
-            alert(error.message);
-
-            if (btn) {
-                btn.innerHTML = "SIGN IN";
-                btn.disabled = false;
-            }
-
+            alert("❌ " + error.message);
+            submitBtn.disabled = false;   // ❌ خطأ أصلاً (submitBtn غير معرف)
+            submitBtn.textContent = 'Sign In';
             return;
         }
 
-        
+        const user = data.user;
+
+        const name =
+            user?.user_metadata?.full_name ||
+            user?.email?.split("@")[0] ||
+            "User";
+
+        localStorage.setItem('userSession', JSON.stringify({
+            email: user.email,
+            name: name,
+            loggedIn: true
+        }));
 
         window.location.href = "index.html";
     });
