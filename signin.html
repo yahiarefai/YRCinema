@@ -131,7 +131,8 @@ const name =
 
 localStorage.setItem('userSession', JSON.stringify({
     email: user.email,
-    name: name,
+    name: user?.user_metadata?.full_name || user.email.split("@")[0],
+    id: user.id,
     loggedIn: true
 }));
 
