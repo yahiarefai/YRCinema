@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
 export default defineConfig({
+  plugins: [], // ضفنا هاي المصفوفة الفاضية عشان نرضي كلاودفلير
   build: {
     rollupOptions: {
       input: {
