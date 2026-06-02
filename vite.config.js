@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 export default defineConfig({
-  plugins: [], // ضفنا هاي المصفوفة الفاضية عشان نرضي كلاودفلير
+  plugins: [cloudflare()], // ضفنا هاي المصفوفة الفاضية عشان نرضي كلاودفلير
   build: {
     rollupOptions: {
       input: {
