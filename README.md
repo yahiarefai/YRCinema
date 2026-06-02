@@ -1,4 +1,4 @@
-# CineVerse - Movie Booking Demo
+# YRCinema - Movie Booking Demo
 
 A simple responsive Movie Booking Website built with HTML, Tailwind CSS, and JavaScript.
 

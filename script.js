@@ -1,4 +1,4 @@
-// CineVerse - script.js : Master Database & Logic
+// YRCinema - script.js : Master Database & Logic
 
 // Optional Supabase helper when available.
 let supabaseClient = null;
@@ -171,10 +171,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-function selectMovie(title, trailerUrl) {
+function selectMovie(title, trailerUrl, posterUrl) {
     const movieData = {
         title,
         trailerUrl,
+        posterUrl,
         bookingTime: new Date().toISOString()
     };
 
@@ -494,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 flex items-center justify-center">
                         <button class="bg-red-600 hover:bg-red-700 px-7 py-3 rounded-xl font-bold tracking-wide shadow-2xl transition duration-300 hover active:scale-95"
-                            onclick="selectMovie('${movie.title}', '${movie.trailer}')">
+                            onclick="selectMovie('${movie.title}', '${movie.trailer}', '${movie.poster}')">
                             BUY TICKETS
                         </button>
                     </div>

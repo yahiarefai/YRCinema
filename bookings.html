@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="images/clapperboard.png">
-    <title>My Bookings - CineVerse</title>
+    <title>My Bookings - YRCinema</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-black text-white p-8 opacity-0 transition-opacity duration-500">
+<body class="bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white p-8 opacity-0 transition-opacity duration-500 min-h-screen">
 
     <div class="fixed top-6 left-6 z-50">
         <button onclick="goBack()" class="group flex items-center space-x-2 text-white bg-black bg-opacity-40 hover:bg-opacity-80 backdrop-blur-md px-5 py-3 rounded-full border border-white/10 transition-all duration-300 hover:border-red-600 hover:shadow-[0_0_15px_rgba(220,38,38,0.5)]">
@@ -17,20 +18,36 @@
         </button>
     </div>
 
-    <div class="max-w-2xl mx-auto pt-24 px-4">
-        <h1 class="text-3xl font-bold mb-8 text-center">My Bookings</h1>
-        <div id="bookingsList">
+    <div class="max-w-4xl mx-auto pt-24 px-4">
+        <div class="mb-12">
+            <h1 class="text-5xl font-black mb-2">My Bookings</h1>
+            <p class="text-gray-400 text-lg">View your booked movie tickets</p>
+        </div>
+        
+        <div id="loadingSpinner" class="flex justify-center items-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+        </div>
+        
+        <div id="bookingsList" class="space-y-6">
         </div>
     </div>
 
     <script>
-        // 1. حركة الظهور عند فتح الصفحة
+        let supabaseClient = null;
+        
+        // Initialize Supabase
+        if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
+            const supabaseUrl = 'https://ectftbenssqjnjbjiati.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdGZ0YmVuc3Nxam5qYmppYXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzE0ODIsImV4cCI6MjA5NDk0NzQ4Mn0.2kWHuS41qV5Hi4Mfid9kn5bD_4u-MyqTvA5Q1I0DExA';
+            supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        }
+
+        // Page animations
         window.addEventListener('load', () => {
             document.body.classList.remove('opacity-0');
             document.body.classList.add('opacity-100');
         });
 
-        // 2. حركة الاختفاء عند كبس زر الرجوع
         function goBack() {
             document.body.classList.remove('opacity-100');
             document.body.classList.add('opacity-0');
@@ -39,22 +56,137 @@
             }, 400);
         }
 
-        // 3. كود جلب الحجوزات
-        document.addEventListener('DOMContentLoaded', () => {
-            const bookings = JSON.parse(localStorage.getItem('bookingsDB') || '[]');
+        // Format date helper
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        // Load bookings
+        async function loadBookings() {
+            const userSession = JSON.parse(localStorage.getItem('userSession') || '{}');
             const container = document.getElementById('bookingsList');
-            if (bookings.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-400">No bookings found.</p>';
-            } else {
-                container.innerHTML = bookings.map(b => `
-    <div class="bg-[#111] border border-[#222] p-8 rounded-lg mb-4 hover:border-gray-700 transition">
-        <h2 class="text-xl font-bold text-white">${b.movie}</h2>
-        <p class="text-gray-400 text-sm mt-1">${b.date} | ${b.time}</p>
-        <div class="mt-4 text-red-500 font-bold text-lg">${b.total} JOD</div>
-    </div>
-`).join('');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            try {
+                let bookings = [];
+
+                // Try to fetch from Supabase first
+                if (supabaseClient && userSession?.email) {
+                    const { data, error } = await supabaseClient
+                        .from('bookings')
+                        .select('*')
+                        .eq('userEmail', userSession.email)
+                        .order('createdAt', { ascending: false });
+
+                    if (!error && data && data.length > 0) {
+                        bookings = data;
+                    } else if (error) {
+                        console.warn('Supabase fetch warning:', error.message);
+                        // Fall back to localStorage
+                        bookings = JSON.parse(localStorage.getItem('bookingsDB') || '[]');
+                    }
+                } else {
+                    // Fall back to localStorage if Supabase not available
+                    bookings = JSON.parse(localStorage.getItem('bookingsDB') || '[]');
+                }
+
+                loadingSpinner.style.display = 'none';
+
+                if (!bookings || bookings.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-20">
+                            <div class="text-6xl mb-4">🎬</div>
+                            <p class="text-xl text-gray-400">No bookings found</p>
+                            <p class="text-gray-500 mt-2">Start booking your favorite movies now!</p>
+                            <button onclick="window.location.href='index.html'" class="mt-6 bg-red-600 hover:bg-red-700 px-8 py-3 rounded-lg font-bold transition">
+                                Browse Movies
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = bookings.map((booking, index) => `
+                        <div class="group">
+                            <div class="bg-gradient-to-r from-gray-800 to-gray-700 rounded-2xl overflow-hidden shadow-2xl hover:shadow-red-600/20 transition-all duration-300 border border-gray-700 hover:border-red-600">
+                                <div class="flex flex-col md:flex-row">
+                                    <!-- Movie Poster -->
+                                    <div class="md:w-48 h-64 md:h-auto flex-shrink-0 bg-gray-900 flex items-center justify-center overflow-hidden">
+                                        ${booking.posterUrl ? `
+                                            <img src="${booking.posterUrl}" alt="${booking.movie}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                        ` : `
+                                            <div class="text-center text-gray-500">
+                                                <div class="text-6xl mb-2">🎥</div>
+                                                <p class="text-sm">No poster</p>
+                                            </div>
+                                        `}
+                                    </div>
+
+                                    <!-- Booking Details -->
+                                    <div class="flex-1 p-8 flex flex-col justify-between">
+                                        <div>
+                                            <div class="flex items-start justify-between mb-6">
+                                                <div>
+                                                    <h2 class="text-3xl font-black text-white mb-2">${booking.movie}</h2>
+                                                    <div class="flex items-center gap-4 text-sm text-gray-400">
+                                                        <span class="flex items-center gap-1">
+                                                            📅 ${formatDate(booking.date)}
+                                                        </span>
+                                                        <span class="flex items-center gap-1">
+                                                            ⏰ ${booking.time}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <p class="text-xs text-gray-500 mb-1">Booking ID</p>
+                                                    <p class="text-sm font-mono text-gray-300">${booking.bookingId}</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Seats -->
+                                            <div class="mb-6">
+                                                <p class="text-xs font-bold text-gray-400 uppercase mb-2">Selected Seats</p>
+                                                <div class="flex flex-wrap gap-2">
+                                                    ${Array.isArray(booking.seats) ? booking.seats.map(seat => `
+                                                        <span class="inline-flex items-center justify-center w-8 h-8 bg-red-600 text-white text-xs font-bold rounded-lg">
+                                                            ${seat}
+                                                        </span>
+                                                    `).join('') : '<span class="text-gray-400">N/A</span>'}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Invoice Info -->
+                                        <div class="pt-6 border-t border-gray-600 flex items-end justify-between">
+                                            <div>
+                                                <p class="text-xs text-gray-500 mb-1">Payment Method</p>
+                                                <p class="text-sm font-semibold text-gray-300 capitalize">${booking.paymentMethod || 'Card'}</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-xs text-gray-500 mb-1">Total Amount</p>
+                                                <p class="text-3xl font-black text-red-500">JOD ${parseFloat(booking.totalPaid || 0).toFixed(3)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                loadingSpinner.style.display = 'none';
+                container.innerHTML = `
+                    <div class="text-center py-20">
+                        <div class="text-6xl mb-4">❌</div>
+                        <p class="text-xl text-gray-400">Error loading bookings</p>
+                        <p class="text-gray-500 mt-2">Please try again later</p>
+                    </div>
+                `;
             }
-        });
+        }
+
+        // Load bookings when page is ready
+        document.addEventListener('DOMContentLoaded', loadBookings);
     </script>
 </body>
 </html>

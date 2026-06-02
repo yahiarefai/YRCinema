@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="images/clapperboard.png">
-    <title>Movie Details - CineVerse</title>
+    <title>Movie Details - YRCinema</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -205,10 +205,12 @@
 
         function proceedToSeats() {
             // حفظ معلومات الفيلم والتاريخ والوقت للمرحلة القادمة
+            const selectedMovieData = JSON.parse(localStorage.getItem('selectedMovie') || '{}');
             const sessionData = {
                 title: selectedMovieTitle,
                 date: chosenDate,
-                time: chosenTime
+                time: chosenTime,
+                posterUrl: selectedMovieData.posterUrl || ''
             };
             localStorage.setItem('bookingSession', JSON.stringify(sessionData));
             transitionTo('seats.html');
