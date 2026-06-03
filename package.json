@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp forgot-password.html dist/forgot-password.html && cp reset-password.html dist/reset-password.html",
+    "build": "vite build && node -e \"require('fs').copyFileSync('forgot-password.html','dist/forgot-password.html'); require('fs').copyFileSync('reset-password.html','dist/reset-password.html')\"",
     "preview": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy"
   },
