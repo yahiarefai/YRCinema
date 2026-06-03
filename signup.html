@@ -181,24 +181,11 @@
                             phone: phone
                         },
                         // هذا الرابط هو الذي سيعود إليه المستخدم بعد الضغط على Confirm في الإيميل
-                        emailRedirectTo: 'http://127.0.0.1:5500/confirm-email.html'
+                        emailRedirectTo: 'https://yrcinema.com/confirm-email.html'
                     }
                 });
 
                 if (error) throw error;
-
-// حفظ الحساب داخل localStorage
-const usersDB = JSON.parse(localStorage.getItem("usersDB")) || [];
-
-usersDB.push({
-    name: name,
-    lastname: lastname,
-    email: email,
-    password: password
-});
-
-// احفظ الحسابات الجديدة
-localStorage.setItem("usersDB", JSON.stringify(usersDB));
 
                 alert(`📧 Success! A confirmation link has been sent to ${email}. Please check your inbox to activate your account.`);
                 transitionTo(null, 'signin.html');
