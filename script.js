@@ -623,5 +623,5 @@ window.togglePasswordVisibility = togglePasswordVisibility;
 window.showToast = showToast;
 window.handleForgotPassword = function(e) {
     if (e) e.preventDefault();
-    window.location.href = 'reset-password.html';
+    window.location.href = 'forgot-password.html';
 };
