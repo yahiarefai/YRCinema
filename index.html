@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-gray-900 text-white">
     <!-- Portfolio Disclaimer Banner -->
@@ -49,7 +50,7 @@
 
                 <div class="relative group">
                     <button class="flex items-center space-x-3 bg-gray-900 hover:bg-gray-800 px-4 py-2.5 rounded-lg transition border border-gray-700">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-red-600 to-pink-600 flex items-center justify-center font-black text-white text-sm">
+                        <div id="userAvatarInitial" class="w-8 h-8 rounded-full bg-gradient-to-r from-red-600 to-pink-600 flex items-center justify-center font-black text-white text-sm">
                             Y
                         </div>
                         <span id="navUserName" class="font-bold text-sm text-gray-200 tracking-wide">Yahia Rifai</span>
@@ -89,6 +90,47 @@
             localStorage.removeItem('userSession');
             window.location.href = 'signin.html';
         }
+
+        // Initialize Supabase client
+        const supabaseUrl = 'https://ectftbenssqjnjbjiati.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjdGZ0YmVuc3Nxam5qYmppYXRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzE0ODIsImV4cCI6MjA5NDk0NzQ4Mn0.2kWHuS41qV5Hi4Mfid9kn5bD_4u-MyqTvA5Q1I0DExA';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Fetch current user and update avatar with their initial
+        async function updateUserAvatar() {
+            try {
+                // Get the current logged-in user
+                const { data: { user }, error } = await supabase.auth.getUser();
+
+                if (error) {
+                    console.warn('Error fetching user:', error.message);
+                    return;
+                }
+
+                if (!user) {
+                    console.log('No user logged in');
+                    return;
+                }
+
+                // Get the user's name from metadata
+                const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'U';
+
+                // Extract first letter and capitalize it
+                const firstLetter = userName.charAt(0).toUpperCase();
+
+                // Update the avatar element with the initial
+                const avatarElement = document.getElementById('userAvatarInitial');
+                if (avatarElement) {
+                    avatarElement.textContent = firstLetter;
+                }
+            } catch (err) {
+                console.error('Error updating avatar:', err.message);
+                // Avatar will remain with default 'Y'
+            }
+        }
+
+        // Call the function when the page loads
+        window.addEventListener('load', updateUserAvatar);
     </script>
 
     <!-- SWIPER CAROUSEL HERO -->
