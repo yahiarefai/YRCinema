@@ -1,4 +1,4 @@
-# YRCinema - Movie Booking Demo
+# YRCinema - Movie Booking Platform
 
 A simple responsive Movie Booking Website built with HTML, Tailwind CSS, and JavaScript.
 
